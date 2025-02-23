@@ -62,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
               thickness: 1,
             ),
             Container(
+              padding: EdgeInsets.only(right: 8),
               child: buttons(),
             ),
           ],
