@@ -1,3 +1,4 @@
+import 'package:calculator_bp/logic/calculator_logic.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,7 +32,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  String placeholder = "This text is a placeholder.";
+  CalculatorLogic calculatorLogic = CalculatorLogic();
+
+  String display = "";
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 alignment: Alignment.bottomRight,
                 padding: EdgeInsets.only(right: 16, bottom: 8, left: 16),
                 child: Text(
-                  placeholder,
+                  display,
                   style: TextStyle(fontSize: 48),
                 ),
               ),
@@ -102,9 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: backgroundColor,
       ),
       onPressed: () {
-        // Just for the UI showcase, the logic is not implemented yet.
+        calculatorLogic.handleInput(text);
         setState(() {
-          placeholder = text;
+          display = calculatorLogic.display;
         });
       },
       child: Text(text, style: TextStyle(color: color, fontSize: 24)),
