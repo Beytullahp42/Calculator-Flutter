@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
           display = calculatorLogic.display;
         });
       },
-      child: Text(text, style: TextStyle(color: color, fontSize: 24)),
+      child: Text(text, style: TextStyle(color: color, fontSize: 24), textAlign: TextAlign.end),
     );
   }
 

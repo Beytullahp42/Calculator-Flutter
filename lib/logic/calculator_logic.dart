@@ -14,10 +14,12 @@ class CalculatorLogic {
       return;
     } else if (input == "!") {
       applyFactorial();
+      return;
     } else if (input == ".") {
       addDecimal();
     } else if (_isOperator(input)) {
       applyOperator(input);
+      if (display == "Error") return;
     } else if (isDigit(input)) {
       appendDigit(input);
     }
@@ -38,8 +40,12 @@ class CalculatorLogic {
 
   void appendDigit(String input) {
     if (_operator.isEmpty) {
+      if ((_firstNumber == "0" || _firstNumber == "-") && input == "0") return;
       _firstNumber += input;
     } else {
+      if ((_secondNumber == "0" || _secondNumber == "-") && input == "0") {
+        return;
+      }
       _secondNumber += input;
     }
   }
@@ -76,8 +82,8 @@ class CalculatorLogic {
 
   void calculateResult() {
     if (_firstNumber.isEmpty) return;
-    if(display == "Error") return;
     double result = _calculate();
+    if (display == "Error") return;
     clear();
     if (result == result.toInt()) {
       display = result.toInt().toString();
@@ -163,6 +169,14 @@ class CalculatorLogic {
   }
 
   void updateDisplay() {
-    display = "$_firstNumber $_operator $_secondNumber";
+    if (_firstNumber.isEmpty) {
+      display = "";
+    } else if (_operator.isEmpty) {
+      display = _firstNumber;
+    } else if (_secondNumber.isEmpty) {
+      display = "$_firstNumber $_operator";
+    } else {
+      display = "$_firstNumber $_operator $_secondNumber";
+    }
   }
 }
