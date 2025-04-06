@@ -1,3 +1,6 @@
+import '../model/calculation.dart';
+import 'database_service.dart';
+
 class CalculatorLogic {
   String _firstNumber = "";
   String _operator = "";
@@ -74,7 +77,15 @@ class CalculatorLogic {
     }
 
     if (_operator.isNotEmpty && _secondNumber.isNotEmpty) {
-      _firstNumber = _calculate().toInt().toString();
+      double result = _calculate();
+      String resultString;
+      if (result == result.toInt()) {
+        resultString = result.toInt().toString();
+      } else {
+        resultString = result.toString();
+      }
+      saveCalculation(resultString);
+      _firstNumber = resultString;
       _secondNumber = "";
     }
     _operator = input;
@@ -83,15 +94,27 @@ class CalculatorLogic {
   void calculateResult() {
     if (_firstNumber.isEmpty) return;
     double result = _calculate();
+    String resultString;
+    if (result == result.toInt()) {
+      resultString = result.toInt().toString();
+    } else {
+      resultString = result.toString();
+    }
+    saveCalculation(resultString);
     if (display == "Error") return;
     clear();
-    if (result == result.toInt()) {
-      display = result.toInt().toString();
-      _firstNumber = result.toInt().toString();
-    } else {
-      display = result.toString();
-      _firstNumber = result.toString();
-    }
+    display = resultString;
+    _firstNumber = resultString;
+  }
+
+  Future<void> saveCalculation(String result) async {
+    String calculation = "$_firstNumber $_operator $_secondNumber = $result";
+    Calculation newCalculation = Calculation(
+      calculation: calculation,
+      date: DateTime.now(),
+    );
+
+    await DatabaseService().insert(newCalculation);
   }
 
   double _calculate() {

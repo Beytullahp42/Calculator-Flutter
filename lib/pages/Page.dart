@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'CalculatorPage.dart';
+import 'HistoryPage.dart';
 import 'KilometerToMilePage.dart';
 
 class MainPage extends StatelessWidget {
@@ -37,22 +38,28 @@ class MainPage extends StatelessWidget {
                         fontWeight: FontWeight.bold)),
               ),
               ListTile(
-                title: Text("Home"),
-                onTap: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CalculatorPage()));
-                },
-              ),
+                  title: Text("Home"),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CalculatorPage()));
+                  }),
               ListTile(
                   title: Text("Kilometer to Mile Converter"),
                   onTap: () {
                     Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const KilometerToMilePage()),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const KilometerToMilePage()));
+                  }),
+              ListTile(
+                  title: Text("History"),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HistoryPage()));
                   }),
             ],
           ),
