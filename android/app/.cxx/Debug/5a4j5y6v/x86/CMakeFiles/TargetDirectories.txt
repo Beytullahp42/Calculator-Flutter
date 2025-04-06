@@ -1,2 +1,0 @@
-C:/Users/beytp/StudioProjects/FlutterCalculatorWithKilometerToMileConverter/android/app/.cxx/Debug/5a4j5y6v/x86/CMakeFiles/edit_cache.dir
-C:/Users/beytp/StudioProjects/FlutterCalculatorWithKilometerToMileConverter/android/app/.cxx/Debug/5a4j5y6v/x86/CMakeFiles/rebuild_cache.dir
