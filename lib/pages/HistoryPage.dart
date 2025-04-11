@@ -1,7 +1,9 @@
 import 'package:calculator_bp/logic/database_service.dart';
 import 'package:calculator_bp/model/calculation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 import 'Page.dart';
 
@@ -73,6 +75,12 @@ class _HistoryPageState extends State<HistoryPage> {
                       return Column(
                         children: [
                           ListTile(
+                            onTap: () {
+                              Clipboard.setData(
+                                ClipboardData(text: calculation.result),
+                              );
+                              Fluttertoast.showToast(msg: "Copied to clipboard");
+                            },
                             title: Text(
                               calculation.calculation,
                               style: const TextStyle(fontSize: 20),

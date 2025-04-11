@@ -3,11 +3,13 @@ import 'dart:convert';
 class Calculation {
   final int? id;
   final String calculation;
+  final String result;
   final DateTime date;
 
   const Calculation({
     this.id,
     required this.calculation,
+    required this.result,
     required this.date,
   });
 
@@ -17,6 +19,7 @@ class Calculation {
     return {
       'id': id,
       'calculation': calculation,
+      'result': result,
       'date': date.toIso8601String(),
     };
   }
@@ -25,6 +28,7 @@ class Calculation {
     return Calculation(
       id: map['id'],
       calculation: map['calculation'],
+      result: map['result'],
       date: DateTime.parse(map['date']),
     );
   }

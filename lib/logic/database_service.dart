@@ -34,6 +34,7 @@ class DatabaseService {
     await db.execute('''CREATE TABLE calculations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       calculation TEXT NOT NULL,
+      result TEXT NOT NULL,
       date TEXT NOT NULL
     )''');
   }
@@ -57,6 +58,7 @@ class DatabaseService {
       return Calculation(
         id: maps[i]['id'],
         calculation: maps[i]['calculation'],
+        result: maps[i]['result'],
         date: DateTime.parse(maps[i]['date']),
       );
     });

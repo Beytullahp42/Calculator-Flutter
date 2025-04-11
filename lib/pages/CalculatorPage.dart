@@ -69,8 +69,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
       color = Colors.white;
       backgroundColor = Colors.green;
     } else if (text == "C" ||
-        text == "!" ||
-        text == "mod" ||
+        text == "^" ||
+        text == "%" ||
         text == "÷" ||
         text == "×" ||
         text == "–" ||
@@ -95,26 +95,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
   }
 
   List<String> buttonList = [
-    "C",
-    "!",
-    "mod",
-    "÷",
-    "7",
-    "8",
-    "9",
-    "×",
-    "4",
-    "5",
-    "6",
-    "–",
-    "1",
-    "2",
-    "3",
-    "+",
-    "⌫",
-    "0",
-    ".",
-    "="
+    "C", "^", "%", "÷",
+    "7", "8", "9", "×",
+    "4", "5", "6", "–",
+    "1", "2", "3", "+",
+    "⌫", "0", ".", "="
   ];
 }
 

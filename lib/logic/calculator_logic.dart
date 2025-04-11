@@ -1,205 +1,175 @@
+import 'dart:math';
+
 import '../model/calculation.dart';
 import 'database_service.dart';
 
 class CalculatorLogic {
-  String _firstNumber = "";
-  String _operator = "";
-  String _secondNumber = "";
-  String display = "";
-
-  void handleInput(String input) {
-    if (input == "C") {
-      clear();
-    } else if (input == "⌫") {
-      backspace();
-    } else if (input == "=") {
-      calculateResult();
-      return;
-    } else if (input == "!") {
-      applyFactorial();
-      return;
-    } else if (input == ".") {
-      addDecimal();
-    } else if (_isOperator(input)) {
-      applyOperator(input);
-      if (display == "Error") return;
-    } else if (isDigit(input)) {
-      appendDigit(input);
-    }
-    updateDisplay();
-  }
-
-  bool isDigit(String input) {
-    return int.tryParse(input) != null;
-  }
-
-  bool _isOperator(String input) {
-    return input == "+" ||
-        input == "÷" ||
-        input == "×" ||
-        input == "–" ||
-        input == "mod";
-  }
-
-  void appendDigit(String input) {
-    if (_operator.isEmpty) {
-      if ((_firstNumber == "0" || _firstNumber == "-") && input == "0") return;
-      _firstNumber += input;
-    } else {
-      if ((_secondNumber == "0" || _secondNumber == "-") && input == "0") {
-        return;
-      }
-      _secondNumber += input;
-    }
-  }
-
-  void addDecimal() {
-    if (_operator.isEmpty) {
-      if (!_firstNumber.contains(".")) {
-        _firstNumber += ".";
-      }
-    } else {
-      if (!_secondNumber.contains(".")) {
-        _secondNumber += ".";
-      }
-    }
-  }
-
-  void applyOperator(String input) {
-    if (display == "Error") {
-      return;
-    }
-    if (_firstNumber.isEmpty) {
-      if (input == "–") {
-        _firstNumber = "-";
-      }
-      return;
-    }
-
-    if (_operator.isNotEmpty && _secondNumber.isNotEmpty) {
-      double result = _calculate();
-      String resultString;
-      if (result == result.toInt()) {
-        resultString = result.toInt().toString();
-      } else {
-        resultString = result.toString();
-      }
-      saveCalculation(resultString);
-      _firstNumber = resultString;
-      _secondNumber = "";
-    }
-    _operator = input;
-  }
-
-  void calculateResult() {
-    if (_firstNumber.isEmpty) return;
-    double result = _calculate();
-    String resultString;
-    if (result == result.toInt()) {
-      resultString = result.toInt().toString();
-    } else {
-      resultString = result.toString();
-    }
-    saveCalculation(resultString);
-    if (display == "Error") return;
-    clear();
-    display = resultString;
-    _firstNumber = resultString;
-  }
+  List<String> inputList = [];
+  String display = '';
+  String tempCalculation = '';
 
   Future<void> saveCalculation(String result) async {
-    String calculation = "$_firstNumber $_operator $_secondNumber = $result";
+    String calculation = "$tempCalculation = $result";
     Calculation newCalculation = Calculation(
       calculation: calculation,
+      result: result,
       date: DateTime.now(),
     );
 
     await DatabaseService().insert(newCalculation);
   }
 
-  double _calculate() {
-    double num1 = double.parse(_firstNumber);
-    if (_secondNumber.isEmpty) return num1;
-    double num2 = double.parse(_secondNumber);
-    switch (_operator) {
-      case "+":
-        return num1 + num2;
-      case "–":
-        return num1 - num2;
-      case "×":
-        return num1 * num2;
-      case "÷":
-        if (num2 == 0) {
-          showFinalMessage("Error");
-          return 0.0;
+  void handleInput(String input) {
+    if (input == 'C') {
+      inputList.clear();
+    } else if (input == '=') {
+      _calculateResult();
+      return;
+    } else if (input == '⌫') {
+      _handleBackspace();
+    } else if (input == '%') {
+      if (inputList.isNotEmpty && !_isOperator(inputList.last)) {
+        double lastNumber = double.parse(inputList.last);
+        double percentage = lastNumber / 100;
+        inputList[inputList.length - 1] = percentage.toString();
+      }
+    } else if (input == '.') {
+      _handleDot();
+    } else if (_isOperator(input)) {
+      _handleOperator(input);
+    } else {
+      _handleDigits(input);
+    }
+    updateDisplay();
+  }
+
+  void _handleDigits(String input) {
+    if (inputList.isNotEmpty && !_isOperator(inputList.last)) {
+      String last = inputList.last;
+      if (last == '0') {
+        inputList[inputList.length - 1] = input;
+      } else {
+        inputList[inputList.length - 1] += input;
+      }
+    } else if (inputList.isEmpty || _isOperator(inputList.last)) {
+      inputList.add(input);
+    }
+  }
+
+  void _calculateResult() {
+    if (inputList.isEmpty) return;
+    if (_isOperator(inputList.last)) inputList.removeLast();
+
+    tempCalculation = inputList.join(' ');
+
+    _evaluateOperators(['^']);
+    _evaluateOperators(['×', '÷']);
+    _evaluateOperators(['+', '–']);
+
+    if (inputList.length == 1) {
+      double result = double.parse(inputList[0]);
+      String fixed = result.toStringAsFixed(6);
+      double fixedResult = double.parse(fixed);
+      if (fixedResult == fixedResult.toInt()) {
+        inputList[0] = fixedResult.toInt().toString();
+      } else {
+        inputList[0] = fixedResult.toString();
+      }
+      display = inputList[0];
+      saveCalculation(inputList[0]);
+      inputList.clear();
+    }
+    else {
+      display = "Error";
+      inputList.clear();
+    }
+  }
+
+  void _evaluateOperators(List<String> operators) {
+    int i = 0;
+    while (i < inputList.length) {
+      if (operators.contains(inputList[i])) {
+        String operator = inputList[i];
+        double first = double.parse(inputList[i - 1]);
+        double second = double.parse(inputList[i + 1]);
+
+        String result = _calculate(first, second, operator);
+        if (result == "Error") {
+          inputList.clear();
+          display = "Error";
+          return;
         }
-        return num1 / num2;
-      case "mod":
-        return num1 % num2;
+        inputList[i - 1] = result;
+        inputList.removeAt(i + 1);
+        inputList.removeAt(i);
+        i = 0;
+      } else {
+        i++;
+      }
+    }
+  }
+
+  String _calculate(double firstNumber, double secondNumber, String operator) {
+    switch (operator) {
+      case '+':
+        return (firstNumber + secondNumber).toString();
+      case '–':
+        return (firstNumber - secondNumber).toString();
+      case '×':
+        return (firstNumber * secondNumber).toString();
+      case '÷':
+        if (secondNumber == 0) {
+          return 'Error';
+        } else {
+          return (firstNumber / secondNumber).toString();
+        }
+      case '^':
+        return pow(firstNumber, secondNumber).toString();
       default:
-        return num1;
+        return 'Error';
     }
   }
 
-  void applyFactorial() {
-    if (display == "Error") {
-      return;
-    }
-    if (_secondNumber.isNotEmpty) {
-      _firstNumber = _calculate().toInt().toString();
-      _operator = "";
-      _secondNumber = "";
-    }
-
-    if (_firstNumber.contains(".")) {
-      showFinalMessage("Error");
-      return;
-    }
-    int number = int.parse(_firstNumber);
-    if (number < 0) {
-      showFinalMessage("Error");
-      return;
-    }
-    int result = 1;
-    for (int i = 1; i <= number; i++) {
-      result *= i;
-    }
-    clear();
-    display = result.toString();
-    _firstNumber = result.toString();
-  }
-
-  void backspace() {
-    if (_secondNumber.isNotEmpty) {
-      _secondNumber = _secondNumber.substring(0, _secondNumber.length - 1);
-    } else if (_operator.isNotEmpty) {
-      _operator = "";
-    } else if (_firstNumber.isNotEmpty) {
-      _firstNumber = _firstNumber.substring(0, _firstNumber.length - 1);
+  void _handleBackspace() {
+    if (inputList.isNotEmpty) {
+      String lastInput = inputList.last;
+      if (lastInput.length > 1) {
+        inputList[inputList.length - 1] =
+            lastInput.substring(0, lastInput.length - 1);
+      } else {
+        inputList.removeLast();
+      }
     }
   }
 
-  void clear() {
-    _firstNumber = "";
-    _operator = "";
-    _secondNumber = "";
-    display = "";
+  void _handleDot() {
+    if (inputList.isNotEmpty && !_isOperator(inputList.last)) {
+      String lastInput = inputList.last;
+      if (!lastInput.contains('.')) {
+        inputList[inputList.length - 1] = '$lastInput.';
+      }
+    } else {
+      inputList.add('0.');
+    }
   }
 
-  void showFinalMessage(String message) {
-    clear();
-    display = message;
+  bool _isOperator(String input) {
+    return input == '÷' ||
+        input == '×' ||
+        input == '–' ||
+        input == '+' ||
+        input == '^';
+  }
+
+  void _handleOperator(String operator) {
+    if (inputList.isNotEmpty && !_isOperator(inputList.last)) {
+      inputList.add(operator);
+    } else if (inputList.isNotEmpty) {
+      inputList[inputList.length - 1] = operator;
+    }
   }
 
   void updateDisplay() {
-    if (_firstNumber.isEmpty) {
-      display = "";
-    } else if (_operator.isEmpty) {
-      display = _firstNumber;
-    } else if (_secondNumber.isEmpty) {
-      display = "$_firstNumber $_operator";
-    } else {
-      display = "$_firstNumber $_operator $_secondNumber";
-    }
+    display = inputList.join(' ');
   }
 }
