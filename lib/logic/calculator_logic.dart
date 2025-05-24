@@ -77,7 +77,6 @@ class CalculatorLogic {
       }
       display = inputList[0];
       saveCalculation(inputList[0]);
-      inputList.clear();
     }
     else {
       display = "Error";
